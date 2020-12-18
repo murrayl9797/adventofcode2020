@@ -110,7 +110,7 @@ const run = (path, cycles) => {
   }
 
 
-  /***** Now we have matrix, run through cycles ********/
+  /***** Now we have cube, run through cycles ********/
 
   let currCycle = 0;
 
@@ -124,6 +124,7 @@ const run = (path, cycles) => {
   })
 
 
+  // Time to cycle
   while (currCycle < 6) {
 
     // Transform cubeTwo

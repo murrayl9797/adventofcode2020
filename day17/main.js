@@ -100,7 +100,7 @@ const run = (path, cycles) => {
   }
 
 
-  /***** Now we have matrix, run through cycles ********/
+  /***** Now we have cube, run through cycles ********/
 
   let currCycle = 0;
 
