@@ -36,45 +36,55 @@ const run = (path, cycles) => {
     groups.push(Array.from(new Array(n), a => '.'));
   }
 
-  /****************** Create 3D Grid *******************/
-  let cubeOne = [];
+  /****************** Create 4D Grid *******************/
+  let hyperCubeOne = [];
 
-  for (var z = 0; z < n; z++) {
-    // For each z plane, make a 2D matrix
+  for (var w = 0; w < n; w++) {
+    const cube = [];
 
-    const matrix = [];
-    for (var y = 0; y < n; y++) {
-      // For each row, make a bunch of a columns
+    for (var z = 0; z < n; z++) {
+      // For each z plane, make a 2D matrix
 
-      const row = [];
-      for (var x = 0; x < n; x++) {
-        row.push('.');
+      const matrix = [];
+      for (var y = 0; y < n; y++) {
+        // For each row, make a bunch of a columns
+
+        const row = [];
+        for (var x = 0; x < n; x++) {
+          row.push('.');
+        }
+
+        // Once row is full, push onto matrix
+        matrix.push(row);
       }
 
-      // Once row is full, push onto matrix
-      matrix.push(row);
+      // Once matrix is full, push onto cubeOne
+      if (z === Math.floor(n / 2) && w === Math.floor(n / 2)) {
+        cube.push(groups);
+      } else {
+        cube.push(matrix);
+      }
     }
 
-    // Once matrix is full, push onto cubeOne
-    if (z === Math.floor(n / 2)) {
-      cubeOne.push(groups);
-    } else {
-      cubeOne.push(matrix);
-    }
+    // Once cube is full, push onto hyperCube
+
+    hyperCubeOne.push(cube);
   }
 
   /***** Helper function to update the cube ********/
-  const checkPosition = (z, y, x, oldCube, newCube) => {
+  const checkPosition = (w, z, y, x, oldCube, newCube) => {
     let activeCount = 0;
-    let currPos = oldCube[z][y][x];
+    let currPos = oldCube[w][z][y][x];
 
-    for (let zDiff = -1; zDiff < 2; zDiff++) {
-      for (let yDiff = -1; yDiff < 2; yDiff++) {
-        for (let xDiff = -1; xDiff < 2; xDiff++) {
-          // Only check neighbors, not self
-          if (!(xDiff === yDiff && yDiff === zDiff && zDiff === 0)) {
-            let neighbor = oldCube[z+zDiff][y+yDiff][x+xDiff];
-            neighbor === '#' ? activeCount++ : null;
+    for (let wDiff = -1; wDiff < 2; wDiff++) {
+      for (let zDiff = -1; zDiff < 2; zDiff++) {
+        for (let yDiff = -1; yDiff < 2; yDiff++) {
+          for (let xDiff = -1; xDiff < 2; xDiff++) {
+            // Only check neighbors, not self
+            if (!(xDiff === yDiff && yDiff === zDiff && zDiff === wDiff && wDiff === 0)) {
+              let neighbor = oldCube[w+wDiff][z+zDiff][y+yDiff][x+xDiff];
+              neighbor === '#' ? activeCount++ : null;
+            }
           }
         }
       }
@@ -87,14 +97,14 @@ const run = (path, cycles) => {
       // If current is active
 
       if (!(activeCount === 2 || activeCount === 3)) {
-        newCube[z][y][x] = '.';
+        newCube[w][z][y][x] = '.';
       }
 
     } else {
       // If current is inactive
 
       if (activeCount === 3) {
-        newCube[z][y][x] = '#';
+        newCube[w][z][y][x] = '#';
       }
     }
   }
@@ -105,30 +115,36 @@ const run = (path, cycles) => {
   let currCycle = 0;
 
   // Make a copy cube
-  let cubeTwo = cubeOne.map(matrix => {
-    return matrix.map(row => {
-      return row.slice();
+  let hyperCubeTwo = hyperCubeOne.map(cube => {
+    return cube.map(matrix => {
+      return matrix.map(row => {
+        return row.slice();
+      })
     })
-  });
+  })
 
 
   while (currCycle < 6) {
 
     // Transform cubeTwo
-    for (let z = 1; z < n - 1; z++) {
-      for (let y = 1; y < n - 1; y++) {
-        for(let x = 1; x < n - 1; x++) {
-          // For each position, check neighbor
-          checkPosition(z, y, x, cubeOne, cubeTwo);
+    for (let w = 1; w < n - 1; w++) {
+      for (let z = 1; z < n - 1; z++) {
+        for (let y = 1; y < n - 1; y++) {
+          for(let x = 1; x < n - 1; x++) {
+            // For each position, check neighbor
+            checkPosition(w, z, y, x, hyperCubeOne, hyperCubeTwo);
 
+          }
         }
       }
     }
 
     // Make cubeOne a copy cubeTwo
-    cubeOne = cubeTwo.map(matrix => {
-      return matrix.map(row => {
-        return row.slice();
+    hyperCubeOne = hyperCubeTwo.map(cube => {
+      return cube.map(matrix => {
+        return matrix.map(row => {
+          return row.slice();
+        })
       })
     })
 
@@ -138,10 +154,12 @@ const run = (path, cycles) => {
   // Check how many are still active
   let finalCount = 0;
 
-  for (let z = 0; z < n; z++) {
-    for (let y = 0; y < n; y++) {
-      for (let x = 0; x < n; x++) {
-        cubeOne[z][y][x] === '#' ? finalCount++ : null ;
+  for (let w = 0; w < n; w++) {
+    for (let z = 0; z < n; z++) {
+      for (let y = 0; y < n; y++) {
+        for (let x = 0; x < n; x++) {
+          hyperCubeOne[w][z][y][x] === '#' ? finalCount++ : null ;
+        }
       }
     }
   }
@@ -151,5 +169,5 @@ const run = (path, cycles) => {
 
 
 
-console.log(`Test:`, run('./inputs/test.txt', 10));
+//console.log(`Test:`, run('./inputs/test.txt', 10));
 console.log(`Answer:`, run('./inputs/mine.txt', 10));
